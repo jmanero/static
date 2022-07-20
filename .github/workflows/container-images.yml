@@ -1,0 +1,32 @@
+name: Container Images
+on: [ push ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  container_image:
+    name: Build and Push Container Image
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build Image
+      id: build
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: ghcr.io/jmanero/static
+        tags: latest 0.0.1 0.0.1-${{ github.sha }}
+        containerfiles: Containerfile
+
+    - name: Push Image to Registry
+      id: push
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        tags: ${{ steps.build.outputs.tags }}
+        image: ${{ steps.build.outputs.image }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
