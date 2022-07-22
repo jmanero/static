@@ -13,7 +13,7 @@ import (
 )
 
 // Dir implements http.FileSystem much like http.Dir, without all of the scary
-// security concerns documented therein, but note the less still present, no
+// security concerns documented therein, but none the less still present, no
 // doubt for pesky notions of reverse comparability...
 type Dir string
 
@@ -27,6 +27,8 @@ const (
 	LastModified    = "Last-Modified"
 
 	DefaultContentType = "application/octet-stream"
+
+	IndexFile = "index.html"
 )
 
 // WriteCounter wraps an http.ResponseWriter with a body-size counter
@@ -123,7 +125,7 @@ func (dir Dir) ServeFile(w *WriteCounter, r *http.Request, target string) {
 
 	if mode&fs.ModeSymlink != 0 {
 		// Try to follow a symlink that resolves to another file in the root path
-		ltarget, err := filepath.EvalSymlinks(target)
+		target, err := filepath.EvalSymlinks(target)
 		if err != nil {
 			ServeError(w, r, err)
 			return
@@ -131,7 +133,13 @@ func (dir Dir) ServeFile(w *WriteCounter, r *http.Request, target string) {
 
 		// Try to serve the resolved path. filepath.EvalSymlinks should never
 		// return a path to another symlink.
-		dir.ServeFile(w, r, ltarget)
+		dir.ServeFile(w, r, target)
+		return
+	}
+
+	if mode.IsDir() {
+		// Try to serve index.html in a directory
+		dir.ServeFile(w, r, filepath.Join(target, IndexFile))
 		return
 	}
 

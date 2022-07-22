@@ -25,7 +25,7 @@ var (
 var Logger = log.New(os.Stderr, "", log.LUTC|log.Ldate|log.Ltime)
 
 func init() {
-	pflag.StringVar(&ListenFlag, "listen", "127.0.0.1:9807", "Set the service's listener address/port")
+	pflag.StringVar(&ListenFlag, "listen", "0.0.0.0:9807", "Set the service's listener address/port")
 	pflag.BoolVar(&HelpFlag, "help", false, "Print usage and exit")
 
 	pflag.Usage = func() {

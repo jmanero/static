@@ -12,6 +12,8 @@ import (
 const (
 	// Based upon nginx log format: $remote_addr - $remote_user [$time_local] "$request" $status $request_time $body_bytes_sent "$http_referer" "$http_user_agent"
 	AccessLogFormat = `%s - %s [%s] "%s %s %s" %d %s %d "%s" "%s"`
+
+	InternalServerErrorMessage = "Internal Server Error"
 )
 
 // Loggers
@@ -58,7 +60,7 @@ func ServeError(w *WriteCounter, r *http.Request, err error) {
 	}
 
 	// Respond with 500 and log error details internally
-	http.Error(w, "Internal Server Error", 500)
+	http.Error(w, InternalServerErrorMessage, http.StatusInternalServerError)
 	LogAccess(w, r, http.StatusInternalServerError)
 	Errors.Println(r.RemoteAddr, r.Method, r.RequestURI, r.Proto, err)
 }
